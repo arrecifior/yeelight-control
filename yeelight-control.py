@@ -26,7 +26,7 @@ logger.info('Starting the application')
 # init the application
 bulbs = Bulb(conn, cursor)
 presets = Preset()
-#scenes = Scene(conn, cursor)
+scenes = Scene(conn, cursor)
 
 # menu
 
@@ -57,7 +57,7 @@ MENU > BULBS:
         try:
             opt = int(input(': '))
         except:
-            ("\nInvalid input!\n")
+            ("\nInvalid input!")
         else:
 
             if opt == 1: # refresh bulbs list
@@ -91,7 +91,7 @@ MENU > BULBS:
                                     bulb_req = input(': ')
                                     if bulb_req == 'back':
                                         break
-                                    bulbs.set_bulb(bulb_req, preset)
+                                    bulbs.set(bulb_req, preset)
                                 except BulbExc as e:
                                     logger.warning(e.message)
                                     print(e.message)
@@ -151,14 +151,90 @@ MENU > PRESETS:
         try:
             opt = int(input(': '))
         except:
-            ("\nInvalid input!\n")
+            ("\nInvalid input!")
         else:
             if opt == 1:
                 break
 
-
 def menu_scenes():
-    print('\nFeature unavailable!')
+    while True:
+        print('\nSCENE LIST:')
+        try:
+            scenes.print_list()
+        except SceneExc as e:
+            print(e.message)
+
+        print('''
+MENU > SCENES:
+1. Set scene
+2. Add scene
+3. Remove scene
+4. Back''')
+        try:
+            opt = int(input(': '))
+        except:
+            print('\nInvalid input!')
+        else:
+
+            if  opt == 1: # set scene
+                logger.info('Trying to set a scene ...')
+                if len(scenes.list()) == 0:
+                    logger.warning('No scenes saved!')
+                    print('\nThe scene list is empty!')
+                else:
+                    try:
+                        print('\nEnter a scene name to set:')
+                        print('Scenes:', ', '.join(scenes.list()))
+                        scene_req = input(': ')
+                        scenes.set(scene_req, bulbs, presets)
+                    except SceneExc as e:
+                        logger.warning(e.message)
+                        print(e.message)
+                    except:
+                        logger.error('Something went wrong while setting a scene')
+                        print('Something went wrong!')
+                    else:
+                        logger.info('Scene ' + scene_req + ' set successfully')
+
+            elif opt == 2: # add scene
+                logger.info('Trying to add a new scene ...')
+                print('\nEnter a new scene name:')
+                name = input(': ')
+                print()
+
+                try:
+                    scenes.add(name, bulbs, presets)
+                except SceneExc as e:
+                    logger.warning(e.message)
+                    print(e.message)
+                except:
+                    logger.error('Something went wrong while adding a scene')
+                    print('Something went wrong!')
+                else:
+                    logger.info('Scene ' + name + ' added successfully')
+
+            elif opt == 3: # remove scene
+                logger.info('Trying to delete a scene ...')
+                if len(scenes.list()) == 0:
+                    logger.warning('No scenes to remove!')
+                    print('\nNo scenes to remove!')
+                else:
+                    try:
+                        print('\nEnter a scene name to remove:')
+                        print('Scenes:', ', '.join(scenes.list()))
+                        scene_req = input(': ')
+                        scenes.remove(scene_req)
+                    except SceneExc as e:
+                        logger.warning(e.message)
+                        print(e.message)
+                    except:
+                        logger.error('Something went wrong while removing a scene')
+                        print('Something went wrong!')
+                    else:
+                        logger.info('Bulb ' + scene_req + ' removed successfully')
+
+            elif opt == 4:
+                break 
 
 # main menu
 while True:
@@ -171,7 +247,7 @@ MENU:
     try:
         opt = int(input(': '))
     except:
-        ("\nInvalid input!\n")
+        ("\nInvalid input!")
     else:
 
         if opt == 1:
@@ -188,4 +264,3 @@ MENU:
             conn.close()
             logger.info('Closing the application')
             break
-    

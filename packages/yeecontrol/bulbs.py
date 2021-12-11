@@ -66,14 +66,11 @@ class Bulb():
             bulbs.append(bulb[0])
         return bulbs
 
-    def print_list(self): # print all bulbs
-        bulbs_count = 0
+    def print_list(self): # prints all bulbs
+        if len(self.list()) == 0:
+            raise BulbExc('No bulbs saved.')  
         for bulb in self.__cursor.execute('SELECT name, ip FROM bulbs;'):
-            bulbs_count += 1
-            b = yeelight.Bulb(bulb[1])
-            print('{0:<15}{1:<10}{2:<11}'.format(bulb[1], bulb[0], self.__status(bulb[0])))
-        if bulbs_count == 0:
-            raise BulbExc('No bulbs saved.')    
+            print('{0:<15}{1:<10}{2:<11}'.format(bulb[1], bulb[0], self.__status(bulb[0])))      
 
     def add(self): # adding new bulbs
         print('Searching for bulbs . . .')
@@ -127,7 +124,7 @@ class Bulb():
             self.__cursor.execute('DELETE FROM bulbs WHERE name = ?;', (name,))
             self.__conn.commit()
 
-    def set_bulb(self, name, preset): # se bulb to a preset:
+    def set(self, name, preset): # se bulb to a preset:
         if self.__status(name) == None:
             raise BulbExc('No bulb with such name: ' + name)
 
