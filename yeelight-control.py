@@ -169,7 +169,9 @@ MENU > SCENES:
 1. Set scene
 2. Add scene
 3. Remove scene
-4. Back''')
+4. Export scenes to JSON
+5. Import scenes from JSON
+6. Back''')
         try:
             opt = int(input(': '))
         except:
@@ -233,7 +235,37 @@ MENU > SCENES:
                     else:
                         logger.info('Bulb ' + scene_req + ' removed successfully')
 
-            elif opt == 4:
+            elif opt == 4: # export scenes to JSON
+                logger.info('Trying to export scenes ...')
+                try:
+                    scenes.export()
+                except SceneExc as e:
+                    print()
+                    logger.warning(e.message)
+                    print(e.message)
+                except:
+                    logger.error('Something went wrong while exporting scenes')
+                    print('\nSomething went wrong!')
+                else:
+                    logger.info('Scenes exported successfully')
+                    print('\nScenes exported successfully.')
+
+            elif opt == 5: # import scenes from JSON
+                logger.info('Trying to import scenes from a file ...')
+                filename = input('\nEnter file name to import scenes from: ')
+                try:
+                    scenes.load(filename)
+                except FileNotFoundError:
+                    logger.warning('No such file: ' + filename)
+                    print('File with this name does not exist!')
+                except SceneExc as e:
+                    logger.warning(e.message)
+                    print(e.message)
+                except:
+                    logger.error('Something went wrong while importing scenes')
+                    print('Something went wrong!')
+
+            elif opt == 6:
                 break
 
 # main menu

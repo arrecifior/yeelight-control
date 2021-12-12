@@ -1,3 +1,4 @@
+import json
 import yeelight
 
 class SceneExc(Exception): # generic scene exception
@@ -16,13 +17,6 @@ class Scene():
                     settings TEXT NOT NULL
                     );''')
 
-    def __find(self, name): # returns False if scene with said name does not exist
-        found = False
-        for scene in self.__cursor.execute('SELECT name, values FROM scenes;'):
-            if scene[0] == name:
-                found = True
-        return found
-
     def list(self): # returns a list of all scenes
         scenes = []
         for scene in self.__cursor.execute('SELECT name FROM scenes;'):
@@ -34,14 +28,14 @@ class Scene():
             raise SceneExc('No scenes saved.')
         for scene in self.__cursor.execute('SELECT name, settings FROM scenes;'):
             print('{0:<15}'.format(scene[0] + ':'), end='')
-            settings = scene[1].split(';')
-            for item in range(len(settings) - 1):
-                if not item % 2:
-                    print('  ', settings[item], ':', settings[item + 1], end='')
+            settings = json.loads(scene[1])
+            for bulb in settings.keys():
+                print('  ', bulb, ':', settings.get(bulb), end='')
             print()
 
+    #TODO change settings sctructure saved into the DB : affects print_list() and set()
     def add(self, name, bulbs, presets): # add a new scene
-        settings = []
+        settings = {}
         if len(bulbs.list()) == 0:
             raise SceneExc('No bulbs to add to a scene')
         if name in self.list():
@@ -54,8 +48,7 @@ class Scene():
                 preset_req = input(': ')
 
                 if preset_req in presets.list():
-                    settings.append(bulb)
-                    settings.append(preset_req)
+                    settings.update({bulb: preset_req})
                     break
                 elif preset_req == '':
                     break
@@ -64,10 +57,10 @@ class Scene():
 
             print()
 
-        if len(settings) == 0:
+        if len(settings.keys()) == 0:
             raise SceneExc('Cannot save an empty scene!')
 
-        self.__cursor.execute('INSERT INTO scenes (name, settings) VALUES (?,?)', (name, ';'.join(settings)))
+        self.__cursor.execute('INSERT INTO scenes (name, settings) VALUES (?,?)', (name, json.dumps(settings)))
         self.__conn.commit()
 
     def remove(self, name): # remove a scene
@@ -87,13 +80,58 @@ class Scene():
 
         for scene in self.__cursor.execute('SELECT name, settings FROM scenes;'):
             if scene[0] == name:
-                settings = scene[1].split(';')
-                for item in range(len(settings) - 1):
-                    if not item % 2:
-                        try:
-                            bulbs.set(settings[item], presets.get(settings[item + 1]))
-                        except yeelight.main.BulbException:
-                            unavailable = True
+                settings = json.loads(scene[1])
+                for bulb in settings.keys():
+                    try:
+                        bulbs.set(bulb, presets.get(settings.get(bulb)))
+                    except yeelight.main.BulbException:
+                        unavailable = True
 
         if unavailable:
             raise SceneExc('Some bulbs were unavailable.')
+
+    def export(self): # export all scenes to a JSON file
+        if len(self.list()) == 0: # checking if there are any scenes
+            raise SceneExc('No scenes to export!')
+        scenes = {}
+        for scene in self.__cursor.execute('SELECT name, settings FROM scenes;'):
+            settings = json.loads(scene[1])
+            scenes.update({scene[0]: settings})
+
+        with open('scenes-export.json', 'w') as outfile: # saving scenes to JSON
+            json.dump(scenes, outfile, sort_keys=True, indent=4)
+
+    def load(self, filename): # import scenes from a JSON file
+        with open(filename, 'r') as infile: 
+            try: # checking if a file is a valid json
+                scenes = json.load(infile)
+            except json.JSONDecodeError:
+                raise SceneExc('Corrupted data in file: ' + filename)
+
+        found_empty = False
+        found_duplicate = False
+        scenes_added = 0
+
+        for scene in scenes.keys():
+            if len (scenes.get(scene).keys()) == 0:
+                found_empty = False
+                continue # skip if settings are empty
+            if scene in self.list():
+                found_duplicate = True
+                continue # skip if preset is already on the list
+
+            self.__cursor.execute('INSERT INTO scenes (name, settings) VALUES (?,?)', (scene, json.dumps(scenes.get(scene))))
+            self.__conn.commit()
+            scenes_added += 1
+
+        if found_empty or found_duplicate or scenes_added == 0:
+            message = ''
+            
+            if scenes_added == 0:
+                message += 'No new scenes added. '
+            if found_empty:
+                message += 'Skipped empty scene(s). '
+            if found_duplicate:
+                message += 'Skipped duplicate(s). '
+
+            raise SceneExc(message)
