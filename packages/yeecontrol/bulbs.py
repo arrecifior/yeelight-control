@@ -124,18 +124,21 @@ class Bulb():
             self.__cursor.execute('DELETE FROM bulbs WHERE name = ?;', (name,))
             self.__conn.commit()
 
-    def set(self, name, preset): # se bulb to a preset:
+    def set(self, name, preset): # set bulb to a preset:
         if self.__status(name) == None:
             raise BulbExc('No bulb with such name: ' + name)
 
         b = yeelight.Bulb(self.__find_by_name(name))
+        brightness = preset.get('brightness')
+        mode = preset.get('mode')
+        value = preset.get('value')
 
-        if preset.get('brightness') == 0:
+        b.effect = 'smooth'
+
+        if brightness == 0:
             b.turn_off()
         else:
-            b.set_brightness(preset.get('brightness'))
-            if preset.get('mode') == 'CT': 
-                b.set_color_temp(degrees=preset.get('value'))
-            elif preset.get('mode') == 'RGB':
-                b.set_rgb(red=preset.get('value')[0], green=preset.get('value')[1], blue=preset.get('value')[2])
-            b.turn_on()
+            if mode == 'CT': 
+                b.set_scene(yeelight.SceneClass.CT, value, brightness)
+            elif mode == 'RGB':
+                b.set_scene(yeelight.SceneClass.COLOR, value[0], value[1], value[2], brightness)

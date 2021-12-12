@@ -234,7 +234,7 @@ MENU > SCENES:
                         logger.info('Bulb ' + scene_req + ' removed successfully')
 
             elif opt == 4:
-                break 
+                break
 
 # main menu
 while True:
