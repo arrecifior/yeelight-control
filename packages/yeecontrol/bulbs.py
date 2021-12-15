@@ -1,14 +1,40 @@
 import yeelight
 import yeelight.transitions as yeensitions
 
-class BulbExc(Exception): # generic bulb exception
+class BulbExc(Exception): 
+    """Generic exception for Bulb class."""
     def __init__(self, message, head="BulbException", ):
         super().__init__(message)
         self.head = head
         self.message = message
 
 class Bulb():
+    """ This class represents a list of all bulbs.
+    
+    Methods:
+    --------
+    list()
+        Returns a list of bulbs names.
+    print_list()
+        Prints a formatted list of bulbs.
+    add()
+        Method to search bulbs available on local network.
+    remove(name)
+        Remove a bulb from the database.
+    set(name, preset)
+        Sets named bulb to a selected state 
+    """
+
     def __init__(self, conn, cursor):
+        """
+        Parameters:
+        ----------
+        conn:
+            Connection object for SQLite connection.
+        cursor:
+            Cursor object for SQLite connection.
+        """
+
         self.__cursor = cursor
         self.__conn = conn
         # create db table if not exists
@@ -17,13 +43,18 @@ class Bulb():
                     ip TEXT NOT NULL
                     );''')
 
-    # setting up bulb indication pattern
+    # Setting up bulb indication pattern.
     __flash = yeelight.Flow(
         count = 100,
         transitions = yeensitions.alarm()
     )
 
-    def __find_by_ip(self, ip): # find the bulb by ip, return name
+    def __find_by_ip(self, ip: str) -> str:
+        """
+        Find the bulb by ip, return name.
+        Returns None if bulb is not found.
+        """
+
         found = False
         
         for bulb in self.__cursor.execute('SELECT name, ip FROM bulbs;'):
@@ -34,7 +65,12 @@ class Bulb():
         if not found:
             return None
 
-    def __find_by_name(self, name): # find the bulb by name, return ip
+    def __find_by_name(self, name: str) -> str:
+        """
+        Find the bulb by name, return ip.
+        Returns None if bulb is not found.
+        """
+
         found = False
         
         for bulb in self.__cursor.execute('SELECT name, ip FROM bulbs;'):
@@ -45,7 +81,18 @@ class Bulb():
         if not found:
             return None
 
-    def __status(self, name): # checking status of a lightbulb
+    def __status(self, name: str) -> str:
+        """
+        Returns the status of the light bulb.
+        Returns None if bulb is not in the DB.
+
+        Status options:
+        ---------------
+        - on - online, on
+        - off - online, off
+        - unavailable - offline
+        """
+
         found = False
         
         for bulb in self.__cursor.execute('SELECT name, ip FROM bulbs;'):
@@ -60,19 +107,25 @@ class Bulb():
         if not found:
             return None
 
-    def list(self): # returns list of bulb names
+    def list(self) -> list:
+        """Returns the list of bulbs names."""
+
         bulbs = []
         for bulb in self.__cursor.execute('SELECT name FROM bulbs;'):
             bulbs.append(bulb[0])
         return bulbs
 
-    def print_list(self): # prints all bulbs
+    def print_list(self):
+        """Prints a formatted list of all saved bulbs."""
+
         if len(self.list()) == 0:
             raise BulbExc('No bulbs saved.')  
         for bulb in self.__cursor.execute('SELECT name, ip FROM bulbs;'):
             print('{0:<15}{1:<10}{2:<11}'.format(bulb[1], bulb[0], self.__status(bulb[0])))      
 
-    def add(self): # adding new bulbs
+    def add(self):
+        """Performs a process of searching for available bulbs"""
+
         print('Searching for bulbs . . .')
         # getting bulbs list
         res = yeelight.discover_bulbs()
@@ -117,14 +170,33 @@ class Bulb():
             raise BulbExc('No bulbs to add!')
         print('No more bulbs to add.')
 
-    def remove(self, name): # delete a bulb
+    def remove(self, name: str):
+        """Removes a bulb.
+
+        Parameters:
+        -----------
+        name:
+            Name of the bulb to be removed.
+        """
+
         if self.__status(name) == None:
             raise BulbExc("No bulb with such name: " + name)
         else:
             self.__cursor.execute('DELETE FROM bulbs WHERE name = ?;', (name,))
             self.__conn.commit()
 
-    def set(self, name, preset): # set bulb to a preset:
+    def set(self, name: str, preset: dict): 
+        """Sets a bulb to a defined state.
+
+        Parameters:
+        -----------
+        name:
+            Name of the bulb.
+        preset:
+            Dictionary with bulb settings such as brightness etc...
+            Accepts structures produced by a Preset class
+        """
+        
         if self.__status(name) == None:
             raise BulbExc('No bulb with such name: ' + name)
 

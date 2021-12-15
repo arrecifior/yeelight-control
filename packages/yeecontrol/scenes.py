@@ -1,14 +1,45 @@
 import json
 import yeelight
 
-class SceneExc(Exception): # generic scene exception
+class SceneExc(Exception):
+    """Generic exception for the Scene class."""
     def __init__(self, message, head="SceneException", ):
         super().__init__(message)
         self.head = head
         self.message = message
 
 class Scene():
+    """A class to repesent a list of lighting scenes.
+
+    Methods:
+    --------
+
+    list()
+        Returns a list of scene names.
+    print_list()
+        Prints a formatted list of scenes.
+    add(name, bulbs, presets)
+        Adds a new preset.
+    remove(name)
+        Removes a named preset
+    set(name, bulbs, presets)
+        Sets bulbs to a named preset.
+    export()
+        Exports scenes to a JSON file.
+    load(filename)
+        Imports scenes from a JSON file.
+    """
+
     def __init__(self, conn, cursor):
+        """
+        Parameters:
+        ----------
+        conn:
+            Connection object for SQLite connection.
+        cursor:
+            Cursor object for SQLite connection.
+        """
+
         self.__cursor = cursor
         self.__conn = conn
         # create db table if not exitsts
@@ -17,13 +48,17 @@ class Scene():
                     settings TEXT NOT NULL
                     );''')
 
-    def list(self): # returns a list of all scenes
+    def list(self) -> list:
+        """Returns a list of all scene names."""
+
         scenes = []
         for scene in self.__cursor.execute('SELECT name FROM scenes;'):
             scenes.append(scene[0])
         return scenes
 
-    def print_list(self): # print formatted list of all
+    def print_list(self):
+        """Prints a formatted list of all scenes."""
+
         if len(self.list()) == 0:
             raise SceneExc('No scenes saved.')
         for scene in self.__cursor.execute('SELECT name, settings FROM scenes;'):
@@ -34,7 +69,19 @@ class Scene():
             print()
 
     #TODO change settings sctructure saved into the DB : affects print_list() and set()
-    def add(self, name, bulbs, presets): # add a new scene
+    def add(self, name: str, bulbs: object, presets: object):
+        """Adds a new scene.
+
+        Parameters:
+        -----------
+        name:
+            Name of a new preset.
+        bulbs:
+            Bulb class object to acces bulb interactions.
+        presets:
+            Preset class to access presets.
+        """
+
         settings = {}
         if len(bulbs.list()) == 0:
             raise SceneExc('No bulbs to add to a scene')
@@ -63,14 +110,34 @@ class Scene():
         self.__cursor.execute('INSERT INTO scenes (name, settings) VALUES (?,?)', (name, json.dumps(settings)))
         self.__conn.commit()
 
-    def remove(self, name): # remove a scene
+    def remove(self, name: str):
+        """Removes a scene.
+        
+        Parameters:
+        -----------
+        name
+            Name of the scene.
+        """
+
         if name not in self.list():
             raise SceneExc('No scene with such name: ' + name)
         else:
             self.__cursor.execute('DELETE FROM scenes WHERE name = ?;', (name,))
             self.__conn.commit()
 
-    def set(self, name, bulbs, presets): # set bulbs to a scene states
+    def set(self, name: str, bulbs: object, presets: object):
+        """Sets bulbs to a named preset.
+
+        Parameters:
+        -----------
+        name
+            Name of the scene to set.
+        bulbs
+            Bulb class object.
+        presets
+            Preset class object.
+        """
+
         if len(self.list()) == 0:
             raise SceneExc('No scenes saved!')
         if name not in self.list():
@@ -90,7 +157,9 @@ class Scene():
         if unavailable:
             raise SceneExc('Some bulbs were unavailable.')
 
-    def export(self): # export all scenes to a JSON file
+    def export(self):
+        """Exports all saved scenes to a scenes-export.json file."""
+
         if len(self.list()) == 0: # checking if there are any scenes
             raise SceneExc('No scenes to export!')
         scenes = {}
@@ -101,7 +170,15 @@ class Scene():
         with open('scenes-export.json', 'w') as outfile: # saving scenes to JSON
             json.dump(scenes, outfile, sort_keys=True, indent=4)
 
-    def load(self, filename): # import scenes from a JSON file
+    def load(self, filename):
+        """Imports scenes from a JSON file.
+
+        Parameters:
+        -----------
+        filename
+            Name of a file to import scenes from.
+        """
+
         with open(filename, 'r') as infile: 
             try: # checking if a file is a valid json
                 scenes = json.load(infile)
