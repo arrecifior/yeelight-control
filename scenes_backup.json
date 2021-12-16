@@ -1,0 +1,56 @@
+{
+    "blue": {
+        "desk": "blue",
+        "room 1": "blue",
+        "room 2": "blue",
+        "room 3": "blue"
+    },
+    "creative": {
+        "desk": "red",
+        "room 1": "blue",
+        "room 2": "blue",
+        "room 3": "blue"
+    },
+    "day": {
+        "desk": "neutral",
+        "room 1": "off",
+        "room 2": "off",
+        "room 3": "off"
+    },
+    "dim": {
+        "desk": "warm",
+        "room 1": "off",
+        "room 2": "off",
+        "room 3": "off"
+    },
+    "dimmer": {
+        "desk": "dim",
+        "room 1": "off",
+        "room 2": "off",
+        "room 3": "off"
+    },
+    "evening": {
+        "desk": "warm",
+        "room 1": "warm",
+        "room 2": "warm",
+        "room 3": "warm"
+    },
+    "green": {
+        "desk": "green",
+        "room 1": "green",
+        "room 2": "green",
+        "room 3": "green"
+    },
+    "off": {
+        "desk": "off",
+        "room 1": "off",
+        "room 2": "off",
+        "room 3": "off"
+    },
+    "red": {
+        "desk": "red",
+        "room 1": "red",
+        "room 2": "red",
+        "room 3": "red"
+    }
+}
