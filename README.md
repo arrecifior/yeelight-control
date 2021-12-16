@@ -22,7 +22,7 @@ Program was tested using `yeelink.light.color2` and `yeelink.light.color4` bulbs
 ----
 
 ## Roadmap
-### ✔️ 1.0
+### ✔️ v1.0
 - Adding bulbs (setting bulb state, getting bulb status)
 - Presets support (to be used to change bulb state)
 - Creating and applying scenes
