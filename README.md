@@ -1,6 +1,8 @@
 # yeelight-control
 A python application for Yeelight bulbs control via LAN
 
+----
+
 ## How to install
 ### 1. Install Python 3
 https://www.python.org/downloads/
@@ -17,8 +19,10 @@ https://yeelight.readthedocs.io/en/latest/
 
 Program was tested using `yeelink.light.color2` and `yeelink.light.color4` bulbs.
 
+----
+
 ## Roadmap
-### v1.0
+### ✔️ 1.0
 - Adding bulbs (setting bulb state, getting bulb status)
 - Presets support (to be used to change bulb state)
 - Creating and applying scenes
