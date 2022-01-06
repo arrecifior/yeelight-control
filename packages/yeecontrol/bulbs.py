@@ -13,6 +13,10 @@ class Bulb():
     
     Methods:
     --------
+    find_by_ip(ip)
+        Returns name of the bulb
+    find_by_name(name)
+        Returns ip of the bulb
     list()
         Returns a list of bulbs names.
     print_list()
@@ -49,7 +53,7 @@ class Bulb():
         transitions = yeensitions.alarm()
     )
 
-    def __find_by_ip(self, ip: str) -> str:
+    def find_by_ip(self, ip: str) -> str:
         """
         Find the bulb by ip, return name.
         Returns None if bulb is not found.
@@ -65,7 +69,7 @@ class Bulb():
         if not found:
             return None
 
-    def __find_by_name(self, name: str) -> str:
+    def find_by_name(self, name: str) -> str:
         """
         Find the bulb by name, return ip.
         Returns None if bulb is not found.
@@ -137,7 +141,7 @@ class Bulb():
         for bulb in res:
 
             # skip if the bulb is already in the DB
-            if self.__find_by_ip(bulb.get('ip')) != None:
+            if self.find_by_ip(bulb.get('ip')) != None:
                 continue
 
             new_bulbs += 1 # counting bulbs available and not in database
@@ -156,7 +160,7 @@ class Bulb():
                 name = input("Enter bulb name (press Enter to skip): ")
                 if name == "":
                     break
-                elif self.__find_by_name(name) == None:
+                elif self.find_by_name(name) == None:
                     self.__cursor.execute('INSERT INTO bulbs (name, ip) VALUES (?,?)', (name, bulb.get('ip')))
                     self.__conn.commit()
                     print("Bulb", name, "has been added.")
@@ -200,7 +204,7 @@ class Bulb():
         if self.__status(name) == None:
             raise BulbExc('No bulb with such name: ' + name)
 
-        b = yeelight.Bulb(self.__find_by_name(name))
+        b = yeelight.Bulb(self.find_by_name(name))
         brightness = preset.get('brightness')
         mode = preset.get('mode')
         value = preset.get('value')

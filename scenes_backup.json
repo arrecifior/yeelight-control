@@ -11,19 +11,19 @@
         "room 2": "blue",
         "room 3": "blue"
     },
-    "day": {
+    "bright": {
         "desk": "neutral",
         "room 1": "off",
         "room 2": "off",
         "room 3": "off"
     },
-    "dim": {
+    "warm": {
         "desk": "warm",
         "room 1": "off",
         "room 2": "off",
         "room 3": "off"
     },
-    "dimmer": {
+    "dim": {
         "desk": "dim",
         "room 1": "off",
         "room 2": "off",

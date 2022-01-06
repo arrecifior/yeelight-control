@@ -3,7 +3,7 @@ A python application for Yeelight bulbs control via LAN
 
 ----
 
-## How to install
+## How to run on Python
 ### 1. Install Python 3
 https://www.python.org/downloads/
 ### 2. Install YeeLight library for python
@@ -11,7 +11,10 @@ https://yeelight.readthedocs.io/en/latest/
 
 #### On Windows:
 - open Command Prompt
-- type `pip install yeelight`
+- install the following packages:
+-- `pip install yeelight`
+-- `pip install opencv-python`
+-- `pip install pillow`
 
 ### 3. Download and run the code
 - Download and extract the code from the archive.

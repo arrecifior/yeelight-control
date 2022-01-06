@@ -1,6 +1,9 @@
 import logging
 import configparser
 import sqlite3
+from time import sleep
+
+from yeelight.main import BulbException
 
 from packages.yeecontrol.presets import Preset, PresetExc
 from packages.yeecontrol.bulbs import Bulb, BulbExc
@@ -268,31 +271,88 @@ MENU > SCENES:
             elif opt == 6:
                 break
 
+def menu_ambilight():
+    import yeelight
+    import time
+    from PIL import ImageGrab, ImageStat
+
+    bulb = yeelight.Bulb(bulbs.find_by_name('desk'))
+    
+    bulb.turn_on
+    bulb.effect = 'sudden'
+    bulb.start_music()
+
+    try:
+        logger.info('Ambient lighting started')
+        while True:
+
+            t1 = time.time_ns()
+
+            img = ImageStat.Stat(ImageGrab.grab())
+            avg = img.rms
+
+            r = round(avg[0])
+            g = round(avg[1])
+            b = round(avg[2])
+
+            br = (avg[0] + avg[1] + avg[2]) / 3
+            br = round(br * 100 / 255)
+
+            print("Set color:", r, g, b, br, "| Press CTRL+C to stop ambient lighing")
+            print(bulb.effect)
+
+            try:
+                bulb.set_scene(yeelight.SceneClass.COLOR, r, g, b, br / 2)
+            except:
+                logger.info('An error while running ambi light')
+                print('An error occurred')
+
+            t2 = time.time_ns()
+
+            print("Frame processing time:", (t2 - t1) / 1000000, "ms")
+
+            sleep(0.4)
+
+    except KeyboardInterrupt:
+        logger.info('Ambient lighting ended')
+        print('Ambient lighting ended.')
+
+        bulbs.set('desk', presets.get('warm'))
+
+
 # main menu
-while True:
-    print('''
+try:
+    while True:
+        print('''
 MENU:
 1. Bulbs
 2. Presets
 3. Scenes
-4. Exit''')
-    try:
-        opt = int(input(': '))
-    except:
-        ("\nInvalid input!")
-    else:
+4. Ambient Light
+5. Exit''')
+        try:
+            opt = int(input(': '))
+        except:
+            ("\nInvalid input!")
+        else:
 
-        if opt == 1:
-            menu_bulbs()
+            if opt == 1:
+                menu_bulbs()
 
-        elif opt == 2:
-            menu_presets()
+            elif opt == 2:
+                menu_presets()
 
-        elif opt == 3:
-            menu_scenes()
+            elif opt == 3:
+                menu_scenes()
 
-        elif opt == 4:
-            print("\nClosing the application . . . \n")
-            conn.close()
-            logger.info('Closing the application')
-            break
+            elif opt == 4:
+                menu_ambilight()
+
+            elif opt == 5:
+                raise KeyboardInterrupt
+except KeyboardInterrupt:
+    print("\nClosing the application . . . \n")
+    conn.close()
+    logger.info('Closing the application')
+
+sleep(2)
