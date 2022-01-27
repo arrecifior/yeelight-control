@@ -24,7 +24,7 @@ Program was tested using `yeelink.light.color2` and `yeelink.light.color4` bulbs
 
 ----
 ## How to build into an .exe
-`pyinstaller -F --add-data "yeelight-control.db;." yeelight-control.py`
+`pyinstaller -F --add-data "yeelight-control.db;." --icon=logo.ico yeelight-control.py`
 
 ## Roadmap
 ### ✔️ v1.0
