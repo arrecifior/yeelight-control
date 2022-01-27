@@ -1,5 +1,4 @@
 import logging
-import configparser
 import sqlite3
 from time import sleep
 
@@ -12,16 +11,16 @@ from packages.yeecontrol.scenes import Scene, SceneExc
 print('\nStarting Yeelight Control . . .')
 
 # config
-config = configparser.ConfigParser()
-config.read('config.ini')
+config_db_path = "yeelight-control.db"
+config_log_path = "yeelight-control.log"
 
 # database
-conn = sqlite3.connect(config.get('DEFAULT', 'db-path'))
+conn = sqlite3.connect(config_db_path)
 cursor = conn.cursor()
 
 # logger
 FORMAT = '%(name)s:%(levelname)s:%(asctime)s:%(message)s'
-logging.basicConfig(level=logging.INFO, filename=config.get('DEFAULT', 'log-file'), filemode='a', format=FORMAT)
+logging.basicConfig(level=logging.INFO, filename=config_log_path, filemode='a', format=FORMAT)
 logger = logging.getLogger()
 
 logger.info('Starting the application')
